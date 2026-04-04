@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: up
+    env: go
+    runtime: go121
+    buildCommand: go build -o up .
+    startCommand: ./up
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 8080
+    autoDeploy: true
