@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -298,6 +301,107 @@ func handleIndex(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte(dashboardHTML))
 }
 
+type authStatus struct {
+	Authenticated bool   `json:"authenticated"`
+	Role          string `json:"role"`
+}
+
+func fetchAuthStatus(r *http.Request, authServiceURL string) (authStatus, error) {
+	statusURL := strings.TrimRight(authServiceURL, "/") + "/api/status"
+	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, statusURL, nil)
+	if err != nil {
+		return authStatus{}, err
+	}
+
+	if cookie := r.Header.Get("Cookie"); cookie != "" {
+		req.Header.Set("Cookie", cookie)
+	}
+	if authz := r.Header.Get("Authorization"); authz != "" {
+		req.Header.Set("Authorization", authz)
+	}
+
+	client := &http.Client{Timeout: 3 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return authStatus{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		return authStatus{}, fmt.Errorf("auth status endpoint returned %d", resp.StatusCode)
+	}
+
+	var status authStatus
+	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+		return authStatus{}, err
+	}
+
+	return status, nil
+}
+
+func requireAdminDashboard(authServiceURL string, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		status, err := fetchAuthStatus(r, authServiceURL)
+		nextURL := url.QueryEscape(currentRequestURL(r))
+		if err != nil || !status.Authenticated {
+			http.Redirect(w, r, strings.TrimRight(authServiceURL, "/")+"/login?next="+nextURL, http.StatusFound)
+			return
+		}
+		if status.Role != "admin" {
+			http.Redirect(w, r, strings.TrimRight(authServiceURL, "/")+"/verify?next="+nextURL, http.StatusFound)
+			return
+		}
+		next(w, r)
+	}
+}
+
+func currentRequestURL(r *http.Request) string {
+	scheme := "https"
+	if forwarded := strings.TrimSpace(r.Header.Get("X-Forwarded-Proto")); forwarded != "" {
+		scheme = strings.ToLower(forwarded)
+	} else if r.TLS == nil {
+		scheme = "http"
+	}
+	return scheme + "://" + r.Host + r.URL.RequestURI()
+}
+
+func isAllowedOrigin(origin string) bool {
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+	if u.Scheme != "https" {
+		return false
+	}
+	host := strings.ToLower(u.Hostname())
+	if host == "dhanur.me" {
+		return true
+	}
+	return strings.HasSuffix(host, ".dhanur.me")
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if origin != "" && isAllowedOrigin(origin) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Max-Age", "86400")
+			w.Header().Set("Vary", "Origin")
+		}
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -313,15 +417,25 @@ func main() {
 	svcs := loadServices()
 	mon := NewMonitor(svcs)
 	mon.Start()
+	manifest := loadManifest()
+	authServiceURL := os.Getenv("AUTH_SERVICE_URL")
+	if authServiceURL == "" {
+		authServiceURL = "https://auth.dhanur.me"
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", handleIndex)
 	mux.HandleFunc("GET /api/status", handleAPI(mon))
 	mux.HandleFunc("GET /api/health", handleHealth)
+	mux.HandleFunc("GET /api/manifest", handleManifest(manifest))
+	mux.HandleFunc("GET /.well-known/web-app-origin-association", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"web_apps":[{"manifest":"https://dhanur.me/icons/site.webmanifest","details":{"paths":["/*"]}}]}`))
+	})
 
 	addr := ":" + port
 	slog.Info("UP monitor started", "addr", addr, "services", len(svcs))
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, corsMiddleware(mux)); err != nil {
 		slog.Error("Server failed", "err", err)
 		os.Exit(1)
 	}

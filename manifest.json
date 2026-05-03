@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "apps": [
+    {
+      "name": "Home",
+      "url": "https://dhanur.me",
+      "icon": "fa-solid fa-globe",
+      "minRole": "guest"
+    },
+    {
+      "name": "Linkr",
+      "url": "https://linkr.dhanur.me",
+      "icon": "fa-solid fa-link",
+      "minRole": "guest"
+    },
+    {
+      "name": "Tasks",
+      "url": "https://tasks.dhanur.me",
+      "icon": "fa-solid fa-list-check",
+      "minRole": "guest"
+    },
+    {
+      "name": "Auth",
+      "url": "https://auth.dhanur.me",
+      "icon": "fa-solid fa-fingerprint",
+      "category": "Core",
+      "minRole": "guest"
+    },
+    {
+      "name": "Status",
+      "url": "https://up.dhanur.me",
+      "icon": "fa-solid fa-signal",
+      "category": "Core",
+      "minRole": "guest"
+    }
+  ]
+}
