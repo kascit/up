@@ -1,10 +1,10 @@
 {
-  "version": "1",
+  "version": "2",
   "apps": [
     {
       "name": "Home",
       "url": "https://dhanur.me",
-      "icon": "fa-solid fa-globe",
+      "icon": "fa-solid fa-house",
       "minRole": "guest"
     },
     {
@@ -16,7 +16,7 @@
     {
       "name": "Tasks",
       "url": "https://tasks.dhanur.me",
-      "icon": "fa-solid fa-list-check",
+      "icon": "fa-solid fa-clipboard-list",
       "minRole": "guest"
     },
     {
@@ -29,7 +29,7 @@
     {
       "name": "Status",
       "url": "https://up.dhanur.me",
-      "icon": "fa-solid fa-signal",
+      "icon": "fa-solid fa-heart-pulse",
       "category": "Core",
       "minRole": "guest"
     }

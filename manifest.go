@@ -22,13 +22,13 @@ type ManifestResponse struct {
 }
 
 var defaultManifest = ManifestResponse{
-	Version: "1",
+	Version: "2",
 	Apps: []AppEntry{
-		{Name: "Home", URL: "https://dhanur.me", Icon: "fa-solid fa-globe", MinRole: "guest"},
+		{Name: "Home", URL: "https://dhanur.me", Icon: "fa-solid fa-house", MinRole: "guest"},
 		{Name: "Linkr", URL: "https://linkr.dhanur.me", Icon: "fa-solid fa-link", MinRole: "guest"},
-		{Name: "Tasks", URL: "https://tasks.dhanur.me", Icon: "fa-solid fa-list-check", MinRole: "guest"},
+		{Name: "Tasks", URL: "https://tasks.dhanur.me", Icon: "fa-solid fa-clipboard-list", MinRole: "guest"},
 		{Name: "Auth", URL: "https://auth.dhanur.me", Icon: "fa-solid fa-fingerprint", MinRole: "guest", Category: "Core"},
-		{Name: "Status", URL: "https://up.dhanur.me", Icon: "fa-solid fa-signal", MinRole: "guest", Category: "Core"},
+		{Name: "Status", URL: "https://up.dhanur.me", Icon: "fa-solid fa-heart-pulse", MinRole: "guest", Category: "Core"},
 	},
 }
 
