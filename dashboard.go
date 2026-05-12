@@ -129,7 +129,7 @@ const dashboardHTML = `<!DOCTYPE html>
         <div class="relative h-18 flex items-center">
           <picture>
             <img
-              src="https://dhanur.me/images/branding/logo-light.png"
+              src="https://raw.githubusercontent.com/kascit/kascit.github.io/raw-mirror/images/branding/logo-light.png"
               alt="~/dhanur"
               class="h-18 w-auto p-[15px] logo-dark"
               sizes="200px"
@@ -140,7 +140,7 @@ const dashboardHTML = `<!DOCTYPE html>
           </picture>
           <picture class="absolute inset-0 flex items-center">
             <img
-              src="https://dhanur.me/images/branding/logo-dark.png"
+              src="https://raw.githubusercontent.com/kascit/kascit.github.io/raw-mirror/images/branding/logo-dark.png"
               alt="~/dhanur"
               class="h-18 w-auto p-[15px] logo-light"
               sizes="200px"
