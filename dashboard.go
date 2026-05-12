@@ -10,6 +10,42 @@ const dashboardHTML = `<!DOCTYPE html>
   <title>Status — dhanur.me</title>
   <meta name="description" content="Live status dashboard for all dhanur.me services." />
 
+  <!-- Trusted Types default policy (must run before ANY script that uses innerHTML/script.src) -->
+  <script>
+  (function(){
+    if (window.trustedTypes && window.trustedTypes.createPolicy) {
+      try {
+        window.__defaultPolicy = window.trustedTypes.createPolicy('default', {
+          createScriptURL: function(s) { return s; },
+          createHTML: function(s) { return s; }
+        });
+      } catch(e) {}
+    }
+    function installFramePolicy(m) {
+      var orig = Element.prototype[m];
+      Element.prototype[m] = function() {
+        var r = orig.apply(this, arguments);
+        var n = arguments[0];
+        if (n && n.tagName === 'IFRAME') {
+          try {
+            var w = n.contentWindow;
+            if (w && w.trustedTypes && !w.trustedTypes.defaultPolicy) {
+              w.trustedTypes.createPolicy('default', {
+                createHTML: function(s){return s},
+                createScript: function(s){return s},
+                createScriptURL: function(s){return s}
+              });
+            }
+          } catch(e) {}
+        }
+        return r;
+      };
+    }
+    installFramePolicy('appendChild');
+    installFramePolicy('insertBefore');
+  })();
+  </script>
+
   <script>
   window.SiteNavConfig = {
     mode: "navbar",
@@ -79,11 +115,42 @@ const dashboardHTML = `<!DOCTYPE html>
         </button>
     </div>
 
-    <!-- Logo -->
+    <!-- Logo (centered on mobile) -->
     <div class="flex-1 flex justify-center items-center lg:flex lg:justify-start">
-        <a href="https://dhanur.me/" class="btn btn-ghost hover:bg-transparent hover:border-transparent normal-case text-xl font-bold text-base-content site-logo-link">
-            dhanur.me
-        </a>
+      <a
+        href="https://dhanur.me/"
+        data-keybind="d h"
+        data-keybind-action="click"
+        data-tooltip-label="Go to home"
+        data-tooltip-shortcut="d h"
+        data-tooltip-position="bottom"
+        class="btn btn-ghost hover:bg-transparent hover:border-transparent normal-case text-xl font-bold text-base-content logo-firefly site-logo-link tooltip tooltip-bottom"
+      >
+        <div class="relative h-18 flex items-center">
+          <picture>
+            <img
+              src="https://dhanur.me/images/branding/logo-light.png"
+              alt="~/dhanur"
+              class="h-18 w-auto p-[15px] logo-dark"
+              sizes="200px"
+              data-logo-type="dark"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </picture>
+          <picture class="absolute inset-0 flex items-center">
+            <img
+              src="https://dhanur.me/images/branding/logo-dark.png"
+              alt="~/dhanur"
+              class="h-18 w-auto p-[15px] logo-light"
+              sizes="200px"
+              data-logo-type="light"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </picture>
+        </div>
+      </a>
     </div>
 
     <div class="flex-none lg:hidden" aria-hidden="true"><div class="btn btn-circle btn-sm invisible"></div></div>
@@ -99,7 +166,7 @@ const dashboardHTML = `<!DOCTYPE html>
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     </div>
                     <div class="dropdown-panel z-50 mt-2 p-4 bg-base-100 border border-base-content/10 rounded-box w-64 right-0 mr-2 md:mr-4">
-                        <div class="grid grid-cols-3 gap-2" data-apps-grid>
+                        <div class="grid grid-cols-3 gap-2" data-app-menu-grid="desktop">
                             <!-- Apps grid populated by manifest.js -->
                             <div class="col-span-3 flex justify-center py-4 opacity-50"><span class="loading loading-spinner loading-sm"></span></div>
                         </div>
@@ -115,7 +182,7 @@ const dashboardHTML = `<!DOCTYPE html>
                             <i class="fa-solid fa-user text-base-content/50 text-sm"></i>
                         </div>
                         <div data-auth="nav-authed-avatar" class="hidden w-9 h-9 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-1 overflow-hidden">
-                            <img src="" alt="Profile" class="w-full h-full object-cover" />
+                          <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Profile" class="w-full h-full object-cover" />
                         </div>
                     </div>
                     <div class="dropdown-panel z-50 mt-2 bg-base-100 border border-base-content/10 rounded-box w-64 right-0 mr-2 md:mr-4 overflow-hidden">
@@ -123,7 +190,7 @@ const dashboardHTML = `<!DOCTYPE html>
                         <!-- authed header -->
                         <div data-auth="nav-authed-header" class="hidden px-3 pt-3 pb-2 border-b border-base-content/10 cursor-default select-none">
                             <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-full overflow-hidden shrink-0"><img data-auth="nav-authed-header-avatar" class="w-full h-full object-cover" src="" alt="Profile" /></div>
+                                <div class="w-8 h-8 rounded-full overflow-hidden shrink-0"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" data-auth="nav-authed-header-avatar" class="w-full h-full object-cover" alt="Profile" /></div>
                                 <div class="flex-1 min-w-0">
                                     <div class="font-semibold truncate text-sm" data-auth="nav-name"></div>
                                     <div class="text-xs opacity-60 truncate" data-auth="nav-email"></div>
@@ -200,7 +267,7 @@ const dashboardHTML = `<!DOCTYPE html>
         <!-- Mobile apps grid -->
         <div class="px-4 py-4 border-b border-base-content/10" data-nav-chrome="apps">
             <div class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-3">Apps</div>
-            <div class="grid grid-cols-3 gap-2" data-apps-grid-mobile>
+            <div class="grid grid-cols-3 gap-2" data-app-menu-grid="mobile">
                 <div class="col-span-3 flex justify-center py-4 opacity-50"><span class="loading loading-spinner loading-sm"></span></div>
             </div>
         </div>
@@ -212,7 +279,7 @@ const dashboardHTML = `<!DOCTYPE html>
                     <i class="fa-solid fa-user text-base-content/50 text-sm"></i>
                 </div>
                 <div data-auth="mobile-authed-avatar" class="hidden w-9 h-9 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-1 overflow-hidden shrink-0">
-                    <img src="" alt="Profile" class="w-full h-full object-cover" />
+                  <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Profile" class="w-full h-full object-cover" />
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="font-semibold text-sm truncate" data-auth="mobile-name">Guest</div>
