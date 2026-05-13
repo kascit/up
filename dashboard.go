@@ -8,7 +8,7 @@ const dashboardHTML = `<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>up | dhanur.me</title>
-  <link rel="icon" href="https://raw.githubusercontent.com/kascit/kascit.github.io/raw-mirror/static/icons/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="https://raw.githubusercontent.com/kascit/kascit.github.io/raw-mirror/icons/favicon.ico" type="image/x-icon" />
   <meta name="description" content="Live status dashboard for all dhanur.me services." />
 
   <!-- Trusted Types default policy (must run before ANY script that uses innerHTML/script.src) -->
