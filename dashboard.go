@@ -7,7 +7,8 @@ const dashboardHTML = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Status — dhanur.me</title>
+  <title>up | dhanur.me</title>
+  <link rel="icon" href="https://raw.githubusercontent.com/kascit/kascit.github.io/raw-mirror/static/icons/favicon.ico" type="image/x-icon" />
   <meta name="description" content="Live status dashboard for all dhanur.me services." />
 
   <!-- Trusted Types default policy (must run before ANY script that uses innerHTML/script.src) -->
@@ -106,7 +107,7 @@ const dashboardHTML = `<!DOCTYPE html>
     }
   </style>
 </head>
-<body>
+<body class="pt-16">
 <div class="navbar site-topbar fixed top-0 left-0 right-0 z-50 h-16">
     <!-- Mobile hamburger (button, not label, so it works on subdomains without a drawer) -->
     <div class="flex-none lg:hidden">
@@ -313,7 +314,7 @@ const dashboardHTML = `<!DOCTYPE html>
 <main class="w-full max-w-4xl mx-auto p-4 lg:p-8">
 
   <!-- Page header -->
-  <div class="mt-14 mb-10">
+  <div class="mb-10">
     <div class="flex items-center gap-3 mb-3">
       <span id="global-dot" class="w-3 h-3 rounded-full bg-base-content/20"></span>
       <h1 class="text-4xl lg:text-5xl font-extrabold tracking-tight" id="global-title">Checking…</h1>
