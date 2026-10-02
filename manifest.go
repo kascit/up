@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type AppEntry struct {
@@ -17,8 +18,9 @@ type AppEntry struct {
 }
 
 type ManifestResponse struct {
-	Version string     `json:"version"`
-	Apps    []AppEntry `json:"apps"`
+	Version     string     `json:"version"`
+	LastUpdated string     `json:"lastUpdated,omitempty"`
+	Apps        []AppEntry `json:"apps"`
 }
 
 var defaultManifest = ManifestResponse{
@@ -53,6 +55,7 @@ func loadManifest() ManifestResponse {
 	}
 
 	slog.Info("Loaded apps manifest from manifest.json", "count", len(manifest.Apps), "version", manifest.Version)
+	manifest.LastUpdated = time.Now().UTC().Format("Jan 02, 2006")
 	return manifest
 }
 
@@ -69,7 +72,7 @@ func roleLevel(role string) int {
 
 func filterByRole(manifest ManifestResponse, role string) ManifestResponse {
 	level := roleLevel(role)
-	filtered := ManifestResponse{Version: manifest.Version, Apps: make([]AppEntry, 0, len(manifest.Apps))}
+	filtered := ManifestResponse{Version: manifest.Version, LastUpdated: manifest.LastUpdated, Apps: make([]AppEntry, 0, len(manifest.Apps))}
 	for _, app := range manifest.Apps {
 		if roleLevel(app.MinRole) <= level {
 			filtered.Apps = append(filtered.Apps, app)
